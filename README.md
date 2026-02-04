@@ -122,8 +122,10 @@ sudo make install
 ### 步驟 5：設定 Nginx 為系統服務
 
 #### 5.1 創建 systemd 服務檔案
+如果要設定開機自啟動的服務，建議使用 `systemctl` 指令。`systemctl` 是 systemd 系統初始化程式的控制命令，用於管理 Linux 系統上的服務
 
 ```bash
+# 配置 Nginx 服務
 sudo vim /etc/systemd/system/nginx.service
 ```
 
@@ -131,19 +133,34 @@ sudo vim /etc/systemd/system/nginx.service
 
 ```ini
 [Unit]
+# 描述服務
 Description=The NGINX HTTP and reverse proxy server
+
+# 依賴關係，等待網路初始化後再行動
 After=network.target
 
 [Service]
+# Nginx 服務使用 fork 模式運行
 Type=forking
 PIDFile=/usr/local/nginx/logs/nginx.pid
+
+# 啟動前檢查配置文件語法 
 ExecStartPre=/usr/local/nginx/sbin/nginx -t
+
+# 啟動 Nginx 服務
 ExecStart=/usr/local/nginx/sbin/nginx
+
+# 重新加載 Nginx 配置
 ExecReload=/usr/local/nginx/sbin/nginx -s reload
+
+# 停止 Nginx 服務
 ExecStop=/bin/kill -s QUIT $MAINPID
+
+# 私有化 TMP 目錄
 PrivateTmp=true
 
 [Install]
+# 定義開機自啟的目標
 WantedBy=multi-user.target
 ```
 
